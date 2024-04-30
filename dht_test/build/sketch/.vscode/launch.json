@@ -1,0 +1,16 @@
+#line 1 "C:\\Projetos\\github\\SD\\dht_test\\.vscode\\launch.json"
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Wokwi GDB",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}\\build\\dht_test.ino.elf",
+        "cwd": "${workspaceFolder}",
+        "MIMode": "gdb",
+        "miDebuggerPath": "C:\\avr-gcc-13.2.0-x64-windows\\bin\\avr-gdb.exe",
+        "miDebuggerServerAddress": "localhost:3333"
+      }
+    ]
+  }

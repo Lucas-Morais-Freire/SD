@@ -1,0 +1,5 @@
+[wokwi]
+version = 1
+firmware = 'build/dht_test.ino.hex'
+elf = 'build/dht_test.elf'
+gdbServerPort=3333

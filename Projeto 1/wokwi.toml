@@ -1,0 +1,5 @@
+[wokwi]
+version = 1
+firmware = 'build/Projeto 1.ino.hex'
+elf = 'build/Projeto 1.ino.elf'
+gdbServerPort=3333

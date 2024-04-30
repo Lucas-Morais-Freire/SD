@@ -1,0 +1,16 @@
+#line 1 "C:\\Projetos\\github\\SD\\dht_test\\diagram.json"
+{
+    "version": 1,
+    "author": "Lucas Freire",
+    "editor": "wokwi",
+    "parts": [
+      { "type": "wokwi-arduino-mega", "id": "mega", "top": 0, "left": 0, "attrs": {} },
+      { "type": "wokwi-dht22", "id": "dht1", "top": -201.3, "left": 177, "attrs": {} }
+    ],
+    "connections": [
+      [ "mega:5V", "dht1:VCC", "red", [ "v0" ] ],
+      [ "mega:GND.1", "dht1:GND", "black", [ "v-18.6", "h101.8" ] ],
+      [ "dht1:SDA", "mega:12", "green", [ "v67.2", "h-67.1" ] ]
+    ],
+    "dependencies": {}
+  }

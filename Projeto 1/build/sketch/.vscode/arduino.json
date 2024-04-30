@@ -1,0 +1,6 @@
+#line 1 "C:\\Projetos\\github\\SD\\Projeto 1\\.vscode\\arduino.json"
+{
+    "configuration": "cpu=atmega2560",
+    "board": "arduino:avr:mega",
+    "sketch": "Projeto 1.ino"
+}

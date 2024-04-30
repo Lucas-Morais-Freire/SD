@@ -9,6 +9,7 @@ void setup() {
 }
 
 void loop() {
+  analogWrite(A0, 127);
   switch(s) {
   case 0:
     if (PINC & 0b00000001) {

@@ -1,0 +1,10 @@
+{
+  "additionalFiles": "..\\..\\..,..\\..\\..,..\\..",
+  "builtInToolsFolders": "",
+  "compiler.optimization_flags": "",
+  "customBuildProperties": "build.warn_data_percentage=75",
+  "fqbn": "arduino:avr:mega",
+  "hardwareFolders": "C:\\Users\\lucas\\AppData\\Local\\Arduino15\\packages",
+  "otherLibrariesFolders": "C:\\Users\\lucas\\OneDrive\\Documentos\\Arduino\\libraries",
+  "sketchLocation": "C:\\Projetos\\github\\SD\\Projeto 1"
+}
