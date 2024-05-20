@@ -1,0 +1,5 @@
+#line 1 "C:\\Projetos\\github\\SD\\slave_usart_test\\.vscode\\arduino.json"
+{
+    "board": "arduino:avr:uno",
+    "sketch": "slave_usart_test.ino"
+}

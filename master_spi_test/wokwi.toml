@@ -1,0 +1,5 @@
+[wokwi]
+version = 1
+firmware = 'build/master_spi_test.ino.hex'
+elf = 'build/master_spi_test.elf'
+gdbServerPort=3333

@@ -1,0 +1,5 @@
+[wokwi]
+version = 1
+firmware = 'build/slave_usart_test.ino.hex'
+elf = 'build/slave_usart_test.elf'
+gdbServerPort=3333

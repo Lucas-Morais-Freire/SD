@@ -1,0 +1,7 @@
+#line 1 "C:\\Projetos\\github\\SD\\teste_serial\\.vscode\\arduino.json"
+{
+    "configuration": "cpu=atmega2560",
+    "board": "arduino:avr:mega",
+    "port": "COM5",
+    "sketch": "teste_serial.ino"
+}
