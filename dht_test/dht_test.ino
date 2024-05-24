@@ -250,7 +250,6 @@ void lcd_float(float val, uint8_t addr) {
 bool buttons[5];
 
 ISR(INT4_vect) {
-
   if (!buttons[4]) {
     if (!(PINE & 0b00010000)) {
       if (enable) {

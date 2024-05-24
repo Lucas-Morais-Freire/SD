@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "author": "Lucas Freire",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-breadboard-half", "id": "bb1", "top": -233.4, "left": 146.8, "attrs": {} },
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 0.6, "left": 66.6, "attrs": {} },
+    {
+      "type": "wokwi-pushbutton-6mm",
+      "id": "btn1",
+      "top": -143.5,
+      "left": 176.3,
+      "rotate": 90,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-pushbutton-6mm",
+      "id": "btn2",
+      "top": -143.5,
+      "left": 205.1,
+      "rotate": 90,
+      "attrs": { "color": "green" }
+    }
+  ],
+  "connections": [
+    [ "btn1:1.l", "bb1:4t.e", "", [ "$bb" ] ],
+    [ "btn1:2.l", "bb1:2t.e", "", [ "$bb" ] ],
+    [ "btn1:1.r", "bb1:4b.f", "", [ "$bb" ] ],
+    [ "btn1:2.r", "bb1:2b.f", "", [ "$bb" ] ],
+    [ "btn2:1.l", "bb1:7t.e", "", [ "$bb" ] ],
+    [ "btn2:2.l", "bb1:5t.e", "", [ "$bb" ] ],
+    [ "btn2:1.r", "bb1:7b.f", "", [ "$bb" ] ],
+    [ "btn2:2.r", "bb1:5b.f", "", [ "$bb" ] ],
+    [ "uno:GND.1", "bb1:bn.1", "black", [ "v0" ] ],
+    [ "bb1:bn.1", "bb1:2b.g", "black", [ "v0" ] ],
+    [ "bb1:bn.4", "bb1:5b.g", "black", [ "v0" ] ],
+    [ "bb1:7b.g", "uno:8", "green", [ "v96", "h9.6" ] ],
+    [ "bb1:4b.g", "uno:9", "green", [ "v105.6", "h28.8" ] ]
+  ],
+  "dependencies": {}
+}

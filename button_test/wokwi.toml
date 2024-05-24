@@ -1,0 +1,5 @@
+[wokwi]
+version = 1
+firmware = 'build/button_test.ino.hex'
+elf = 'build/button_test.elf'
+gdbServerPort=3333
