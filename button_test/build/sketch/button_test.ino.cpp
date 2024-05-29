@@ -16,15 +16,15 @@ int main() {
 	PORTB |= 0b00000011; // 8, 9 pullup
 
 	// setup
-	Button b1(button0_press, button0_hold, &PINB, PB0, 3000);
-	Button b2(button1_press, button1_hold, &PINB, PB1, 3000);
+	ntd::button b1(button0_press, button0_hold, &PINB, PB0, 3000);
+	ntd::button b2(button1_press, button1_hold, &PINB, PB1, 3000);
 
 	Serial.begin(9600); // para verificar o aperto dos botoes
 	sei();
 
 	while(true) {
 		b1.check_button();
-		// b2.check_button();
+		b2.check_button();
 	}
 	return 0;
 }

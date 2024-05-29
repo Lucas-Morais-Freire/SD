@@ -2,11 +2,11 @@
 #include "button.h"
 #include <avr/interrupt.h>
 
-namespace button_overflow {
-	volatile uint64_t ovfs = 0;
-}
+namespace ntd {
 
-Button::Button(void (*func_press)(), void (*func_hold)(), volatile uint8_t* PINx, uint8_t Pxn, uint64_t delay) {
+volatile uint64_t ovfs = 0;
+
+button::button(void (*func_press)(), void (*func_hold)(), volatile uint8_t* PINx, uint8_t Pxn, uint64_t delay) {
 	static bool setup_done = false;
 	if (!setup_done) {
 		// timer 1
@@ -26,9 +26,9 @@ Button::Button(void (*func_press)(), void (*func_hold)(), volatile uint8_t* PINx
 	this->Pxn = Pxn;
 }
 
-void Button::check_button() {
+void button::check_button() {
 	// se o tempo do delay tiver passado
-	if (delay <= (TCNT1 + 0x10000*(button_overflow::ovfs - cycle)) - time) {
+	if (delay <= (TCNT1 + 0x10000*(ovfs - cycle)) - time) {
 		// e o estado for "desapertado"
 		if (!state) {
 			// e o pino estiver em 0V
@@ -36,14 +36,14 @@ void Button::check_button() {
 				func_press(); // fazer algo
 				state = true; // trocar estado
 				time = TCNT1; // registrar tempo
-				cycle = button_overflow::ovfs; // e ciclo
+				cycle = ovfs; // e ciclo
 			}
 		} else { // se o estado for "apertado"
 			// e o pino esta em 5V
 			if (*PINx & (1<<Pxn)) {
 				state = false;
 				time = TCNT1;
-				cycle = button_overflow::ovfs;
+				cycle = ovfs;
 			} else { // se ainda estiver em 0V
 				func_hold();
 			}
@@ -51,6 +51,8 @@ void Button::check_button() {
 	}
 }
 
+}
+
 ISR(TIMER1_OVF_vect) {
-	button_overflow::ovfs++;
+	ntd::ovfs++;
 }

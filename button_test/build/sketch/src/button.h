@@ -3,7 +3,8 @@
 #define BUTTON_H
 #include <avr/io.h>
 
-class Button {
+namespace ntd {
+class button {
 private:
 	bool state;             // estado do botao (apertado, desapertado)
 	void (*func_press)();   // funcao para executar ao apertar
@@ -23,17 +24,18 @@ public:
 	 * @param Pxn 		 ID do pino (deve ter sido previamente configurado como INPUT_PULLUP)
 	 * @param delay      Quantidade de delay em microssegundos
 	 */
-	Button(void (*func_press)(), void (*func_hold)(), volatile uint8_t* PINx, uint8_t Pxn, uint64_t delay);
+	button(void (*func_press)(), void (*func_hold)(), volatile uint8_t* PINx, uint8_t Pxn, uint64_t delay);
 	/**
 	 * @brief Constroi um objeto de botao padrao
 	 * 
 	 */
-	Button() : Button(nullptr, nullptr, nullptr, 0, 0) {};
+	button() : button(nullptr, nullptr, nullptr, 0, 0) {};
 	/**
 	 * @brief Checa o estado atual do botao e realiza as operacoes necessarias
 	 * 
 	 */
 	void check_button();
 };
+}
 
 #endif
