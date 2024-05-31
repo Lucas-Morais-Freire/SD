@@ -1,0 +1,6 @@
+#line 1 "C:\\Projetos\\github\\SD\\dummy_controller\\.vscode\\arduino.json"
+{
+    "board": "arduino:avr:uno",
+    "sketch": "dummy_controller.ino",
+    "port": "COM6"
+}

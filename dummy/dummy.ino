@@ -40,5 +40,6 @@ ISR(TIMER1_COMPA_vect) {
     }
 
     PORTA = 1 << i;
+    PORTC = 1 << (i - 8);
     i = i == 23 ? 0 : i + 1;
 }

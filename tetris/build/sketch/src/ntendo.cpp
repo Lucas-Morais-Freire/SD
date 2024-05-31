@@ -1,3 +1,4 @@
+#line 1 "C:\\Projetos\\github\\SD\\tetris\\src\\ntendo.cpp"
 #include "ntendo_private.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -8,29 +9,29 @@ namespace ntd {
 void ntendo_::set_ports(volatile uint8_t *PORTt,
                         volatile uint8_t *PORTm,
                         volatile uint8_t *PORTb,
-                        volatile uint8_t *DDRl,
-                        volatile uint8_t *DDRr) {
+                        volatile uint8_t *PORTl,
+                        volatile uint8_t *PORTr) {
     _PORTt = PORTt;
     _PORTm = PORTm;
     _PORTb = PORTb;
-    _DDRl = DDRl;
-    _DDRr = DDRr;
+    _PORTl = PORTl;
+    _PORTr = PORTr;
 }
 
 void ntendo_::begin(uint8_t frame_rate) {
     _scans_per_frame = 60/frame_rate;
 
     _temp_frame = new uint8_t*[24];
-    _temp_frame[0] = new uint8_t[2*24];
+    _temp_frame[0] = new uint8_t[16*24];
     for (int i = 1; i < 24; i++) {
-        _temp_frame[i] = _temp_frame[i - 1] + 2;
+        _temp_frame[i] = _temp_frame[i - 1] + 16;
     }
     memset((void*)(_temp_frame[0]), 0, 48);
 
     _write_frame = new uint8_t*[24];
-    _write_frame[0] = new uint8_t[2*24];
+    _write_frame[0] = new uint8_t[16*24];
     for (int i = 1; i < 24; i++) {
-        _write_frame[i] = _write_frame[i - 1] + 2;
+        _write_frame[i] = _write_frame[i - 1] + 16;
     }
     memset((void*)(_write_frame[0]), 0, 48);
 
@@ -82,7 +83,7 @@ char* ntendo_::get_inputs() {
 
 ISR(TIMER1_COMPA_vect) {
     static uint8_t line = 23;
-    static uint8_t scan_count = ntd::_scans_per_frame;
+    static uint64_t scan_count = ntd::_scans_per_frame;
     if (scan_count == ntd::_scans_per_frame) {
         switch (ntd::_state) {
         case ntd::ACK_CONTROLLER: // verificar se controle responde
@@ -181,10 +182,12 @@ ISR(TIMER1_COMPA_vect) {
     }
 
     // placeholder (andre)
-    //
+    *ntd::_PORTt = 1 << line;
+    *ntd::_PORTl = 0x00;
     // end placeholder
 
     if (line == 23) {
+        line = 0;
         scan_count = scan_count == ntd::_scans_per_frame ? 0 : scan_count++;
     } else {
         line++;

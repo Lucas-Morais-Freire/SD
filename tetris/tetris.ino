@@ -1,13 +1,17 @@
 #include "src/ntendo.h"
 
 int main() {
-    bool frame[24][16];
+    ntd::ntendo_ ntendo;
 
-    ntendo.set_ports(&PORTA, &PORTC, &PORTL, &PORTF, &PORTK);
+    bool frame[24][16];
+    char* inputs;
+    uint64_t curr_frame;
+
+    ntendo.set_ports(&PORTA, &PORTC, &PORTL, &DDRF, &DDRK);
     ntendo.begin(30);
     while (true) {
-        ntendo.get_inputs();
-        ntendo.get_frame_count();
+        inputs = ntendo.get_inputs();
+        curr_frame = ntendo.get_frame_count();
         // tetris
         ntendo.frame_ready(frame);
     }
