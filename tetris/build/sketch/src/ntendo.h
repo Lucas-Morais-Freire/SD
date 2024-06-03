@@ -1,4 +1,6 @@
 #line 1 "C:\\Projetos\\github\\SD\\tetris\\src\\ntendo.h"
+// #pragma GCC optimize("O0")
+
 #ifndef NTENDO_H
 #define NTENDO_H
 #include <avr/io.h>
@@ -10,8 +12,8 @@ struct ntendo_ {
         volatile uint8_t* PORTt,
         volatile uint8_t* PORTm,
         volatile uint8_t* PORTb,
-        volatile uint8_t* PORTl,
-        volatile uint8_t* PORTr
+        volatile uint8_t* DDRl,
+        volatile uint8_t* DDRr
     );
     void begin(uint8_t frame_rate);
 

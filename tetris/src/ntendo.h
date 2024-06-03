@@ -1,3 +1,5 @@
+// #pragma GCC optimize("O0")
+
 #ifndef NTENDO_H
 #define NTENDO_H
 #include <avr/io.h>

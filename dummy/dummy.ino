@@ -33,11 +33,11 @@ uint8_t data[8] = {
 ISR(TIMER1_COMPA_vect) {
     static uint8_t i = 0;
 
-    if (i < 8) {
-        DDRF = data[i];
-    } else {
-        DDRF = 0x00;
-    }
+    // if (i < 8) {
+    //     DDRF = data[i];
+    // } else {
+    //     DDRF = 0x00;
+    // }
 
     PORTA = 1 << i;
     PORTC = 1 << (i - 8);

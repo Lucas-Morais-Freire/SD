@@ -21,9 +21,12 @@ ISR(USART_RX_vect) {
 		UDR0 = 'k';
         break;
     case 's':
+        String s = "termo";
         while (!(UCSR0A & (1 << UDRE0))); // wait while not empty
-		UDR0 = 1;
-        while (!(UCSR0A & (1 << UDRE0))); // wait while not empty
-		UDR0 = 'r';
+		UDR0 = 5;
+        for (int i = 0; i < s.length(); i++) {
+            while (!(UCSR0A & (1 << UDRE0))); // wait while not empty
+            UDR0 = s[i];
+        }
     }
 }
