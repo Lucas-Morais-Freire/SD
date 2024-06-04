@@ -13,9 +13,7 @@ enum status : uint8_t {
 
 enum recv_status : uint8_t {
     SUCCESS,
-    PARITY_ERROR,
-    NO_RESPONSE,
-    RECEIVING
+    NO_RESPONSE
 };
 
 uint8_t _scans_per_frame;

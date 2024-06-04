@@ -1,11 +1,9 @@
-// #pragma GCC optimize("O0")
 #include "ntendo_private.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <string.h>
 #include <WString.h>
-
-uint16_t start, end;
+#include <util/delay.h>
 
 namespace ntd {
 
@@ -20,7 +18,7 @@ void ntendo_::set_ports(volatile uint8_t *PORTt,
     _DDRl = DDRl;
     _DDRr = DDRr;
 
-    *_DDRl = 0xFF;
+    *_PORTb = 0b10000000;
 }
 
 void ntendo_::begin(uint8_t frame_rate) {
@@ -31,7 +29,6 @@ void ntendo_::begin(uint8_t frame_rate) {
     for (int i = 1; i < 24; i++) {
         _temp_frame[i] = _temp_frame[i - 1] + 2;
     }
-    memset((void*)(_temp_frame[0]), 0, 48);
 
     _write_frame = new uint8_t*[24];
     _write_frame[0] = new uint8_t[2*24];
@@ -47,7 +44,7 @@ void ntendo_::begin(uint8_t frame_rate) {
     // UART config
     UCSR0A |= (1<<U2X0);
     UCSR0B |= (1<<RXCIE0)|(1<<RXEN0)|(1<<TXEN0);  // en recv intr, en recv, en trans
-    UCSR0C |= (1<<UPM01)|(1<<UCSZ00)|(1<<UCSZ01); // even parity, char size 8
+    UCSR0C |= (1<<UCSZ00)|(1<<UCSZ01); // even parity, char size 8
     UCSR0C &= ~(1 << UCPOL0);                     // rising edge
     UBRR0   = 0;                                  // baud rate 1Mbps
 
@@ -62,7 +59,7 @@ void ntendo_::begin(uint8_t frame_rate) {
 }
 
 void ntendo_::frame_ready(bool (&frame)[24][16]) {
-    uint8_t byte;
+    volatile uint8_t byte;
     for (int i = 0; i < 24; i++) {
         for (int j = 0; j < 2; j++) {
             byte = 0;
@@ -86,6 +83,10 @@ char* ntendo_::get_inputs() {
     return (char*)_read_inputs;
 }
 
+uint8_t ntendo_::get_input_len() {
+    return _read_len;
+}
+
 }
 
 ISR(TIMER1_COMPA_vect) {
@@ -104,7 +105,6 @@ ISR(TIMER1_COMPA_vect) {
                 // enviar byte de ack ate responder
                 while (!(UCSR0A & (1 << UDRE0)));
                 UDR0 = 'a';
-                // ntd::_recv_state = ntd::SUCCESS;
                 break;
 
             // recebeu com sucesso
@@ -114,18 +114,6 @@ ISR(TIMER1_COMPA_vect) {
                 ntd::_recv_state = ntd::NO_RESPONSE;
                 while (!(UCSR0A & (1 << UDRE0)));
                 UDR0 = 's';
-                // ntd::_recv_state = ntd::SUCCESS;
-                // comecar a mostrar graficos do jogo
-                // liberar logica do jogo
-                ntd::_frame_ready = false;
-                break;
-
-            // erro de paridade
-            case ntd::PARITY_ERROR:
-                // byte de reenviar
-                ntd::_recv_state = ntd::NO_RESPONSE;
-                while (!(UCSR0A & (1 << UDRE0)));
-                UDR0 = 'r';
                 break;
             }
             break;
@@ -165,20 +153,6 @@ ISR(TIMER1_COMPA_vect) {
                     ntd::_recv_state = ntd::NO_RESPONSE;
                     while (!(UCSR0A & (1 << UDRE0)));
                     UDR0 = 's';
-                    // ntd::_recv_state = ntd::SUCCESS;
-
-                    // incrementar contagem de frames
-                    ntd::_frame_count++;
-                    // liberar para logica do jogo
-                    ntd::_frame_ready = false;
-                    break;
-
-                // erro de paridade
-                case ntd::PARITY_ERROR:
-                    // pedir para reenviar
-                    ntd::_recv_state = ntd::NO_RESPONSE;
-                    while (!(UCSR0A & (1 << UDRE0)));
-                    UDR0 = 'r';
 
                     // incrementar contagem de frames
                     ntd::_frame_count++;
@@ -186,13 +160,21 @@ ISR(TIMER1_COMPA_vect) {
                     ntd::_frame_ready = false;
                     break;
                 }
+            } else {
+                while (!(UCSR0A & (1 << UDRE0)));
+                UDR0 = 'n';
             }
             break;
         }
     }
 
-    *ntd::_PORTt = 1 << line;
-    *ntd::_DDRl  = line % 2 == 0 ? 0xFF : 0x00;
+    uint8_t temp = *ntd::_PORTt >> 7;
+    *ntd::_PORTt = (*ntd::_PORTt << 1) | (*ntd::_PORTb >> 7);
+    *ntd::_PORTb = (*ntd::_PORTb << 1) | (*ntd::_PORTm >> 7);
+    *ntd::_PORTm = (*ntd::_PORTm << 1) | temp;
+
+    *ntd::_DDRl = ntd::_write_frame[line][0];
+    *ntd::_DDRr = ntd::_write_frame[line][1];
 
     if (line == 23) {
         scan_count++;
@@ -203,25 +185,11 @@ ISR(TIMER1_COMPA_vect) {
 }
 
 ISR(USART0_RX_vect) {
-    static int place;
-    static bool error;
-
-    // sei();
-    if (ntd::_recv_state == ntd::NO_RESPONSE) {
-        error = false;
-        place = -1;
-        ntd::_recv_state == ntd::RECEIVING;
-    }
-
-    error = error || ((bool)(UCSR0A & (1<<UPE0)));
+    UCSR0B &= ~(1<<RXCIE0);
     uint8_t val = UDR0;
 
     switch (ntd::_state) {
     case ntd::ACK_CONTROLLER:
-        if (error) {
-            ntd::_recv_state = ntd::PARITY_ERROR;
-            return;
-        }
         if (val == 'k') {
             ntd::_recv_state = ntd::SUCCESS;
         } else {
@@ -229,15 +197,13 @@ ISR(USART0_RX_vect) {
         }
         break;
     case ntd::GAME:
-        if (place == -1) {
-            ntd::_temp_len = val;
-        } else {
-            ntd::_temp_inputs[place] = val;
+        ntd::_temp_len = val;
+        for (int i = 0; i < ntd::_temp_len; i++) {
+            while (!(UCSR0A & (1<<RXC0)));
+            ntd::_temp_inputs[i] = (char)UDR0;
         }
-
-        place++;
-
-        ntd::_recv_state = error ? ntd::PARITY_ERROR : ntd::SUCCESS;
+        ntd::_recv_state = ntd::SUCCESS;
         break;
     }
+    UCSR0B |= (1<<RXCIE0);
 }

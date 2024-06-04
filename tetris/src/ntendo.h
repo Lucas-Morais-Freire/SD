@@ -18,6 +18,7 @@ struct ntendo_ {
 
     uint64_t get_frame_count();
     char* get_inputs();
+    uint8_t get_input_len();
     void frame_ready(bool (&frame)[24][16]);
 };
 
