@@ -29,6 +29,7 @@ void ntendo_::begin(uint8_t frame_rate) {
     for (int i = 1; i < 24; i++) {
         _temp_frame[i] = _temp_frame[i - 1] + 2;
     }
+    memset((void*)(_temp_frame[0]), 0, 48);
 
     _write_frame = new uint8_t*[24];
     _write_frame[0] = new uint8_t[2*24];
@@ -114,6 +115,7 @@ ISR(TIMER1_COMPA_vect) {
                 ntd::_recv_state = ntd::NO_RESPONSE;
                 while (!(UCSR0A & (1 << UDRE0)));
                 UDR0 = 's';
+                ntd::_frame_ready = false;
                 break;
             }
             break;
@@ -121,7 +123,8 @@ ISR(TIMER1_COMPA_vect) {
         case ntd::GAME: // processamento grafico do jogo
             if (ntd::_frame_ready) { // se o frame esta pronto
                 // trocar os frames
-                volatile uint8_t** swap_frames = ntd::_temp_frame;
+                uint8_t** volatile swap_frames = ntd::_temp_frame;
+                // volatile uint8_t** swap_frames = ntd::_temp_frame;
                 ntd::_temp_frame = ntd::_write_frame;
                 ntd::_write_frame = swap_frames;
 
@@ -173,8 +176,8 @@ ISR(TIMER1_COMPA_vect) {
     *ntd::_PORTb = (*ntd::_PORTb << 1) | (*ntd::_PORTm >> 7);
     *ntd::_PORTm = (*ntd::_PORTm << 1) | temp;
 
-    *ntd::_DDRl = ntd::_write_frame[line][0];
-    *ntd::_DDRr = ntd::_write_frame[line][1];
+    *ntd::_DDRl = ntd::_write_frame[23 - line][0];
+    *ntd::_DDRr = ntd::_write_frame[23 - line][1];
 
     if (line == 23) {
         scan_count++;

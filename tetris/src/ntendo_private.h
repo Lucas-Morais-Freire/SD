@@ -17,8 +17,10 @@ enum recv_status : uint8_t {
 
 uint8_t _scans_per_frame;
 volatile bool _frame_ready = true;
-volatile uint8_t** _temp_frame;
-volatile uint8_t** _write_frame;
+uint8_t** volatile _temp_frame;
+uint8_t** volatile _write_frame;
+// volatile uint8_t** _temp_frame;
+// volatile uint8_t** _write_frame;
 volatile uint8_t* _PORTt,* _PORTm,* _PORTb,* _DDRl,* _DDRr;
 volatile uint64_t _frame_count = 0;
 volatile status _state = ACK_CONTROLLER;
