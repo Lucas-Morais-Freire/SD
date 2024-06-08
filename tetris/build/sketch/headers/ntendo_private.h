@@ -1,3 +1,4 @@
+#line 1 "C:\\Projetos\\github\\SD\\tetris\\headers\\ntendo_private.h"
 #ifndef NTENDO_PRIVATE_H
 #define NTENDO_PRIVATE_H
 
@@ -15,7 +16,7 @@ enum recv_status : uint8_t {
     NO_RESPONSE
 };
 
-uint8_t _scans_per_frame;
+volatile uint8_t _scans_per_frame;
 volatile bool _frame_ready = true;
 uint8_t** volatile _temp_frame;
 uint8_t** volatile _write_frame;
@@ -25,8 +26,8 @@ volatile uint8_t* _PORTt,* _PORTm,* _PORTb,* _DDRl,* _DDRr;
 volatile uint64_t _frame_count = 0;
 volatile status _state = ACK_CONTROLLER;
 volatile uint8_t _recv_state = NO_RESPONSE;
-volatile char* _read_inputs;
-volatile char* _temp_inputs;
+volatile char* volatile _read_inputs;
+volatile char* volatile _temp_inputs;
 volatile uint8_t _read_len;
 volatile uint8_t _temp_len;
 

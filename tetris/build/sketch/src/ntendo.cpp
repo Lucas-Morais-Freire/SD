@@ -1,13 +1,8 @@
 #line 1 "C:\\Projetos\\github\\SD\\tetris\\src\\ntendo.cpp"
-// #pragma GCC optimize("O0")
-#include "ntendo_private.h"
+#include "../headers/ntendo_private.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <string.h>
-#include <WString.h>
-#include <util/delay.h>
-
-uint16_t start, end;
 
 namespace ntd {
 
@@ -23,7 +18,6 @@ void ntendo_::set_ports(volatile uint8_t *PORTt,
     _DDRr = DDRr;
 
     *_PORTb = 0b10000000;
-    // *_DDRl = 0xFF;
 }
 
 void ntendo_::begin(uint8_t frame_rate) {
@@ -47,7 +41,14 @@ void ntendo_::begin(uint8_t frame_rate) {
     _temp_inputs = new char[256];
 
     cli();
-    // UART config
+    // UART3 config
+    UCSR3A |= (1<<U2X3);
+    UCSR3B |= (1<<RXCIE3)|(1<<RXEN3)|(1<<TXEN3);  // en recv intr, en recv, en trans
+    UCSR3C |= (1<<UCSZ30)|(1<<UCSZ31); // even parity, char size 8
+    UCSR3C &= ~(1 << UCPOL3);                     // rising edge
+    UBRR3   = 0;                                  // baud rate 1Mbps
+    
+    // UART0 config (debug)
     UCSR0A |= (1<<U2X0);
     UCSR0B |= (1<<RXCIE0)|(1<<RXEN0)|(1<<TXEN0);  // en recv intr, en recv, en trans
     UCSR0C |= (1<<UCSZ00)|(1<<UCSZ01); // even parity, char size 8
@@ -65,7 +66,7 @@ void ntendo_::begin(uint8_t frame_rate) {
 }
 
 void ntendo_::frame_ready(bool (&frame)[24][16]) {
-    uint8_t byte;
+    volatile uint8_t byte;
     for (int i = 0; i < 24; i++) {
         for (int j = 0; j < 2; j++) {
             byte = 0;
@@ -97,7 +98,7 @@ uint8_t ntendo_::get_input_len() {
 
 ISR(TIMER1_COMPA_vect) {
     static uint8_t line = 0;
-    static uint8_t scan_count = ntd::_scans_per_frame;
+    static volatile uint8_t scan_count = ntd::_scans_per_frame;
     if (scan_count == ntd::_scans_per_frame) {
         scan_count = 0;
         switch (ntd::_state) {
@@ -109,9 +110,8 @@ ISR(TIMER1_COMPA_vect) {
                 /// modificar lcd para "sem controle"
 
                 // enviar byte de ack ate responder
-                while (!(UCSR0A & (1 << UDRE0)));
-                UDR0 = 'a';
-                ntd::_recv_state = ntd::SUCCESS;
+                while (!(UCSR3A & (1 << UDRE3)));
+                UDR3 = 'a';
                 break;
 
             // recebeu com sucesso
@@ -119,9 +119,9 @@ ISR(TIMER1_COMPA_vect) {
                 // pedir para enviar entradas
                 ntd::_state = ntd::GAME;
                 ntd::_recv_state = ntd::NO_RESPONSE;
-                while (!(UCSR0A & (1 << UDRE0)));
-                UDR0 = 's';
-                ntd::_recv_state = ntd::SUCCESS;
+                while (!(UCSR3A & (1 << UDRE3)));
+                UDR3 = 's';
+                ntd::_frame_ready = false;
                 break;
             }
             break;
@@ -129,9 +129,12 @@ ISR(TIMER1_COMPA_vect) {
         case ntd::GAME: // processamento grafico do jogo
             if (ntd::_frame_ready) { // se o frame esta pronto
                 // trocar os frames
-                volatile uint8_t** swap_frames = ntd::_temp_frame;
+                uint8_t** volatile swap_frames = ntd::_temp_frame;
+                // volatile uint8_t** swap_frames = ntd::_temp_frame;
                 ntd::_temp_frame = ntd::_write_frame;
                 ntd::_write_frame = swap_frames;
+                // aumentar contagem de frames
+                ntd::_frame_count++;
 
                 // verificar recepcao de entradas do controle
                 switch (ntd::_recv_state) {
@@ -142,15 +145,15 @@ ISR(TIMER1_COMPA_vect) {
 
                     // enviar byte de ack
                     ntd::_state = ntd::ACK_CONTROLLER;
-                    while (!(UCSR0A & (1 << UDRE0)));
-                    UDR0 = 'a';
+                    while (!(UCSR3A & (1 << UDRE3)));
+                    UDR3 = 'a';
                     break;
 
                 // recebeu com sucesso
                 case ntd::SUCCESS:
                     // trocar a string do frame anterior
                     // pela string recentemente recebida  
-                    volatile char* swap_inputs = ntd::_temp_inputs;
+                    volatile char* volatile swap_inputs = ntd::_temp_inputs;
                     ntd::_temp_inputs = ntd::_read_inputs;
                     ntd::_read_inputs = swap_inputs;
                     
@@ -159,12 +162,9 @@ ISR(TIMER1_COMPA_vect) {
 
                     // pedir para enviar entradas
                     ntd::_recv_state = ntd::NO_RESPONSE;
-                    while (!(UCSR0A & (1 << UDRE0)));
-                    UDR0 = 's';
-                    ntd::_recv_state = ntd::SUCCESS;
+                    while (!(UCSR3A & (1 << UDRE3)));
+                    UDR3 = 's';
 
-                    // incrementar contagem de frames
-                    ntd::_frame_count++;
                     // liberar para logica do jogo
                     ntd::_frame_ready = false;
                     break;
@@ -177,10 +177,10 @@ ISR(TIMER1_COMPA_vect) {
         }
     }
 
-    uint8_t temp = *ntd::_PORTt >> 7;
-    *ntd::_PORTt = (*ntd::_PORTt << 1) | (*ntd::_PORTb >> 7);
+    uint8_t temp = *ntd::_PORTb >> 7;
     *ntd::_PORTb = (*ntd::_PORTb << 1) | (*ntd::_PORTm >> 7);
-    *ntd::_PORTm = (*ntd::_PORTm << 1) | temp;
+    *ntd::_PORTm = (*ntd::_PORTm << 1) | (*ntd::_PORTt >> 7);
+    *ntd::_PORTt = (*ntd::_PORTt << 1) | temp;
 
     *ntd::_DDRl = ntd::_write_frame[line][0];
     *ntd::_DDRr = ntd::_write_frame[line][1];
@@ -193,26 +193,33 @@ ISR(TIMER1_COMPA_vect) {
     }
 }
 
-ISR(USART0_RX_vect) {
-    UCSR0B &= ~(1<<RXCIE0);
-    uint8_t val = UDR0;
+ISR(USART3_RX_vect) {
+    UCSR3B &= ~(1<<RXCIE3);
+    uint8_t val;
 
     switch (ntd::_state) {
     case ntd::ACK_CONTROLLER:
+        val = UDR3;
         if (val == 'k') {
             ntd::_recv_state = ntd::SUCCESS;
         } else {
             ntd::_recv_state = ntd::NO_RESPONSE;
         }
         break;
+
     case ntd::GAME:
-        ntd::_temp_len = val;
+        ntd::_temp_len = UDR3;
         for (int i = 0; i < ntd::_temp_len; i++) {
-            while (!(UCSR0A & (1<<RXC0)));
-            ntd::_temp_inputs[i] = (char)UDR0;
+            while(!(UCSR3A & (1<<RXC3))) {
+                if (TIFR1 & (1<<OCF1A)) {
+                    UCSR3B |= (1<<RXCIE3);
+                    return;
+                }
+            }
+            ntd::_temp_inputs[i] = UDR3;
         }
         ntd::_recv_state = ntd::SUCCESS;
         break;
     }
-    UCSR0B |= (1<<RXCIE0);
+    UCSR3B |= (1<<RXCIE3);
 }

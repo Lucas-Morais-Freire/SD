@@ -1,5 +1,4 @@
-// #pragma GCC optimize("O0")
-
+#line 1 "C:\\Projetos\\github\\SD\\tetris\\headers\\ntendo.h"
 #ifndef NTENDO_H
 #define NTENDO_H
 #include <avr/io.h>
@@ -24,6 +23,6 @@ struct ntendo_ {
 
 }
 
-// ntd::ntendo_ ntendo;
+extern ntd::ntendo_ ntendo;
 
 #endif // NTENDO_H
