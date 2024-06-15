@@ -1,0 +1,6 @@
+controle:
+https://wokwi.com/projects/399881404488232961
+tetris:
+https://editor.p5js.org/lucasmoraisf/sketches/bHtzxAzhJ
+
+é impossivel simular o gerenciador de gráficos pois necessita de comunicação.

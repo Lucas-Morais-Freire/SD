@@ -281,7 +281,7 @@ bool tetrimino::rotate_l(bool (&board)[24][16]) {
     return false;
 }
 
-char tetrimino::get_random_piece() {
+char tetrimino::get_random_piece() const {
     uint8_t p = random(0, 7);
     switch (p) {
     case 0:

@@ -1,7 +1,0 @@
-#line 1 "C:\\Projetos\\github\\SD\\tetris\\.vscode\\arduino.json"
-{
-    "configuration": "cpu=atmega2560",
-    "board": "arduino:avr:mega",
-    "sketch": "tetris.ino",
-    "port": "COM8"
-}

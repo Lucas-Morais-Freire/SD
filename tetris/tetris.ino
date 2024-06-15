@@ -1,4 +1,3 @@
-// #pragma GCC optimize("O0")
 #include "headers/ntendo.h"
 #include "headers/tetrimino.h"
 
@@ -39,7 +38,7 @@ int main() {
     uint8_t level = 0;
     uint8_t R_DAS_counter = 0;
     uint8_t L_DAS_counter = 0;
-    uint8_t frames_per_drop = 48;
+    uint8_t frames_per_drop = 2;
     uint8_t drop_counter = 0;
     uint8_t lines_cleared = 0;
     uint8_t score = 0;
@@ -138,6 +137,15 @@ int main() {
                 }
             }
             break;
+        case OVER:
+            for (uint8_t i = 0; i < len; i++) {
+                if (inputs[i] == 's') {
+                    memset(frame, false, sizeof(frame));
+                    game_state = SPAWN;
+                    break;
+                }
+            }
+            break;
         case FALL:
             curr_piece.unplace(frame);
             
@@ -199,13 +207,13 @@ int main() {
                     reset_L_DAS = false;
                     break;
                 case 'a':
-                    if (curr_piece.rotate_l(frame)) {
+                    if (curr_piece.rotate_r(frame)) {
                         moved = true;
                         lock_delay = 0;
                     }
                     break;
                 case 'b':
-                    if (curr_piece.rotate_r(frame)) {
+                    if (curr_piece.rotate_l(frame)) {
                         moved = true;
                         lock_delay = 0;
                     }

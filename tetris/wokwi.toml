@@ -1,5 +1,0 @@
-[wokwi]
-version = 1
-firmware = 'build/tetris.ino.hex'
-elf = 'build/tetris.elf'
-gdbServerPort=3333

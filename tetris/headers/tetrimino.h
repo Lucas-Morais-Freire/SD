@@ -13,7 +13,7 @@ struct tetrimino {
     const static int I_l_wkdata[4][5][2];
     const static int r_wkdata[4][5][2];
     const static int l_wkdata[4][5][2];
-    char get_random_piece();
+    char get_random_piece() const;
 
     tetrimino() : tetrimino(get_random_piece()) {}
     tetrimino(char type);

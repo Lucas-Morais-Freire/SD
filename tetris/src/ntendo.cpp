@@ -112,7 +112,7 @@ ISR(TIMER1_COMPA_vect) {
                 /// modificar lcd para "sem controle" (TODO)
 
                 while (!(UCSR3A & (1 << UDRE3)));    // enviar byte de ack
-                UDR3 = 'a';                         
+                UDR3 = 'a';
                 break;
 
             case ntd::SUCCESS: // se recebeu com sucesso:
@@ -180,14 +180,22 @@ ISR(TIMER1_COMPA_vect) {
     }
 }
 
+// 3, r, a, l
+
+// logica do jogo
+// troca de contexto
+// 3 (desabilita a interrupcao)
+// r, a, l sem troca de contexto
+// reabilito a interrupcao
+
 ISR(USART3_RX_vect) {
-    UCSR3B &= ~(1<<RXCIE3);
+    UCSR3B &= ~(1<<RXCIE3); // desabilito a interrupcao de recebimento
     uint8_t val;
 
-    switch (ntd::_state) {
+    switch (ntd::_state) { // executar com base no estado do sistema
     case ntd::ACK_CONTROLLER:
-        val = UDR3;
-        if (val == 'k') {
+        val = UDR3;        // receber o byte
+        if (val == 'k') {  // se foi um k, sucesso
             ntd::_recv_state = ntd::SUCCESS;
         } else {
             ntd::_recv_state = ntd::NO_RESPONSE;
@@ -196,17 +204,23 @@ ISR(USART3_RX_vect) {
 
     case ntd::GAME:
         ntd::_temp_len = UDR3;
-        for (int i = 0; i < ntd::_temp_len; i++) {
-            while(!(UCSR3A & (1<<RXC3))) {
-                if (TIFR1 & (1<<OCF1A)) {
-                    UCSR3B |= (1<<RXCIE3);
-                    return;
+        // _temp_len = 3;
+        // desconectou
+        // i = 0: _temp_inputs[0] = 'r';
+        // i = 1: _temp_inputs[1] = 'a';
+        // i = 2: _temp_inputs[2] = 'l';
+        // i = 3: 3 < 3 FALSO
+        for (int i = 0; i < ntd::_temp_len; i++) { // escrever na string os caracteres recebidos (3)
+            while(!(UCSR3A & (1<<RXC3))) {         // preso no loop enquanto nao ha caractere novo recebido
+                if (TIFR1 & (1<<OCF1A)) {          // se nao ha caractere novo, e chegou a hora de trocar de linha
+                    UCSR3B |= (1<<RXCIE3);         // reabilitar a interrupcao de recebimento
+                    return;                        // matar a funcao
                 }
             }
-            ntd::_temp_inputs[i] = UDR3;
+            ntd::_temp_inputs[i] = UDR3;           // quando um byte novo chega, escrever na string
         }
-        ntd::_recv_state = ntd::SUCCESS;
+        ntd::_recv_state = ntd::SUCCESS;           // obteve sucesso na comunicacao
         break;
     }
-    UCSR3B |= (1<<RXCIE3);
+    UCSR3B |= (1<<RXCIE3); // reabilito a interrupcao
 }
